@@ -2,31 +2,21 @@ import streamlit as st
 import pandas as pd
 from textblob import TextBlob
 import re
+import random
 
-# Configuración de la página
 st.set_page_config(
-    page_title="Analizador de Texto Simple",
-    page_icon="📊",
+    page_title="Analizador Emocional Empático",
+    page_icon="💬",
     layout="wide"
 )
 
-# Título y descripción
-st.title("📝 Analizador de Texto con TextBlob")
+st.title("💬 Analizador Emocional Empático")
 st.markdown("""
-Esta aplicación utiliza TextBlob para realizar un análisis básico de texto:
-- Análisis de sentimiento y subjetividad  
-- Traducción automática  
-- Frecuencia de palabras más usadas
+Una herramienta que **interpreta el tono emocional de tus palabras**  
+y responde con un mensaje empático según la energía que transmite tu texto.
 """)
 
-# Barra lateral
-st.sidebar.title("Opciones")
-modo = st.sidebar.selectbox(
-    "Selecciona el modo de entrada:",
-    ["Texto directo", "Archivo de texto"]
-)
-
-# Función para contar palabras
+# --- Funciones auxiliares ---
 def contar_palabras(texto):
     stop_words = set([
         "a","al","como","con","de","del","el","ella","ellas","ellos","en","es",
@@ -41,23 +31,19 @@ def contar_palabras(texto):
         contador[p] = contador.get(p, 0) + 1
     return dict(sorted(contador.items(), key=lambda x: x[1], reverse=True))
 
-# Función para traducir texto con TextBlob
 def traducir_texto(texto):
     try:
         traduccion = TextBlob(texto).translate(to='en')
         return str(traduccion)
-    except Exception as e:
-        st.warning(f"No se pudo traducir automáticamente: {e}")
+    except:
         return texto
 
-# Procesamiento principal
 def procesar_texto(texto):
     texto_traducido = traducir_texto(texto)
     blob = TextBlob(texto_traducido)
     sentimiento = blob.sentiment.polarity
     subjetividad = blob.sentiment.subjectivity
     contador_palabras = contar_palabras(texto_traducido)
-
     return {
         "texto_original": texto,
         "texto_traducido": texto_traducido,
@@ -66,22 +52,40 @@ def procesar_texto(texto):
         "contador_palabras": contador_palabras
     }
 
-# Mostrar resultados
+# --- Respuesta empática ---
+def generar_respuesta(sentimiento):
+    if sentimiento > 0.2:
+        mensajes = [
+            "Se siente una energía positiva en tu texto 😊",
+            "Tu mensaje transmite optimismo y buena vibra ✨",
+            "Parece un texto con emociones alegres y esperanzadoras 🌞"
+        ]
+    elif sentimiento < -0.2:
+        mensajes = [
+            "Tu texto refleja algo de tristeza o preocupación 💭",
+            "Parece un mensaje con una carga emocional más pesada 😔",
+            "Hay un tono sensible, quizá una emoción difícil detrás 💙"
+        ]
+    else:
+        mensajes = [
+            "El texto se percibe bastante equilibrado 😌",
+            "No hay emociones muy fuertes, suena neutral o reflexivo 🪞",
+            "Parece un mensaje tranquilo, sin extremos 💬"
+        ]
+    return random.choice(mensajes)
+
+# --- Visualización ---
 def mostrar_resultados(resultados):
-    st.subheader("🎭 Análisis de Sentimiento")
+    st.subheader("🎭 Análisis Emocional")
     st.write(f"**Sentimiento:** {resultados['sentimiento']:.2f}")
     st.write(f"**Subjetividad:** {resultados['subjetividad']:.2f}")
-    
-    if resultados["sentimiento"] > 0.05:
-        st.success("El texto tiene un tono positivo 😄")
-    elif resultados["sentimiento"] < -0.05:
-        st.error("El texto tiene un tono negativo 😟")
-    else:
-        st.info("El texto es neutral 😐")
-    
+
+    st.markdown("### 💬 Interpretación del tono")
+    st.info(generar_respuesta(resultados["sentimiento"]))
+
     st.subheader("📖 Traducción automática")
     st.text_area("Texto traducido al inglés", resultados["texto_traducido"], height=150)
-    
+
     st.subheader("🔠 Palabras más frecuentes")
     top_words = dict(list(resultados["contador_palabras"].items())[:10])
     if top_words:
@@ -89,32 +93,32 @@ def mostrar_resultados(resultados):
     else:
         st.write("No se encontraron palabras significativas.")
 
-# Modo de texto directo
+# --- Interfaz principal ---
+st.sidebar.title("⚙️ Opciones")
+modo = st.sidebar.selectbox("Selecciona el modo de entrada:", ["Texto directo", "Archivo de texto"])
+
 if modo == "Texto directo":
-    st.subheader("✏️ Ingresa tu texto para analizar")
-    texto = st.text_area("", height=200, placeholder="Escribe o pega aquí el texto que deseas analizar...")
+    st.subheader("🖋️ Escribe tu texto para analizar")
+    texto = st.text_area("", height=200, placeholder="Escribe algo y descubre qué emoción transmite...")
     
-    if st.button("Analizar texto"):
+    if st.button("Analizar texto 💬"):
         if texto.strip():
-            with st.spinner("Analizando texto..."):
+            with st.spinner("Analizando emociones..."):
                 resultados = procesar_texto(texto)
                 mostrar_resultados(resultados)
         else:
             st.warning("Por favor, escribe algo para analizar.")
 
-# Modo de archivo
 else:
     st.subheader("📁 Carga un archivo de texto (.txt)")
     archivo = st.file_uploader("", type=["txt"])
-    
     if archivo is not None:
         contenido = archivo.getvalue().decode("utf-8")
         st.text_area("Vista previa del archivo:", contenido[:500] + ("..." if len(contenido) > 500 else ""))
-        if st.button("Analizar archivo"):
-            with st.spinner("Analizando archivo..."):
+        if st.button("Analizar archivo 💬"):
+            with st.spinner("Leyendo el texto..."):
                 resultados = procesar_texto(contenido)
                 mostrar_resultados(resultados)
 
 st.markdown("---")
-st.markdown("Desarrollado con ❤️ usando Streamlit y TextBlob")
-
+st.markdown("Desarrollado con empatía 💙 por *Isabela Aristizábal*")
