@@ -10,7 +10,7 @@ st.set_page_config(
     layout="wide"
 )
 
-st.title("💬 Analizador Emocional Empático")
+st.title("💬 Analizador Emocional")
 st.markdown("""
 Una herramienta que **interpreta el tono emocional de tus palabras**  
 y responde con un mensaje empático según la energía que transmite tu texto.
@@ -121,4 +121,4 @@ else:
                 mostrar_resultados(resultados)
 
 st.markdown("---")
-st.markdown("Desarrollado con empatía 💙 por *Isabela Aristizábal*")
+st.markdown("Desarrollado con empatía 💙")
